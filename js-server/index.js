@@ -1,4 +1,4 @@
-const pinCount = 14;
+const pinCount = 5;
 
 async function updatePinStates() {
     for (let i = 0; i < pinCount; i++) {
@@ -9,6 +9,35 @@ async function updatePinStates() {
             document.getElementById('pin' + i + 'state').textContent = getPinState(i) ? 'HIGH' : 'LOW';
         }
     }
+}
+
+for (let i = 0; i < pinCount; i++) {
+    let tr = document.createElement('tr');
+    let td = document.createElement('td');
+    td.textContent = 'Pin ' + i;
+    tr.appendChild(td);
+
+    let div = document.createElement('div');
+    td = document.createElement('td');
+    let button = document.createElement('button');
+    button.id = 'pin' + i;
+    button.textContent = 'LOW';
+    td.appendChild(button);
+    div.appendChild(td);
+
+    td = document.createElement('td');
+    td.id = 'pin' + i + 'state';
+    div.appendChild(td);
+    tr.appendChild(div);
+
+    td = document.createElement('td');
+    button = document.createElement('button');
+    button.id = 'pin' + i + 'mode';
+    button.textContent = 'OUTPUT';
+    td.appendChild(button);
+    tr.appendChild(td);
+
+    document.getElementById('pins').appendChild(tr);
 }
 
 
