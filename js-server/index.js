@@ -1,4 +1,4 @@
-const pinCount = 5;
+const pinCount = 14;
 
 async function updatePinStates() {
     for (let i = 0; i < pinCount; i++) {
