@@ -38,6 +38,5 @@ Run `cd js-server && ../cpp-backend/bin/cpp-backend server.js <serial_port>`, wh
 The server lauches a http server on port 8080.
 
 ## HTTPS support
+
 For https support, a key and certificate with the names `selfsigned.key` and `selfsigned.crt`, respectively, will need to be generated in the `js-server` folder. Also, lines 12-18, 93 and 99-101 in `js-server/server.js` will need to be uncommented. With this, a https server will also start on port 8443.
-
-
