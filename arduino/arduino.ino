@@ -1,3 +1,5 @@
+#define PIN_COUNT 14
+
 enum Commands {
   COMMAND_INIT = 0xFF,
   COMMAND_WRITE = 0,
@@ -18,7 +20,7 @@ struct PinState {
   int value;
 };
 
-PinState pins[14];
+PinState pins[PIN_COUNT];
 
 void setup() {
   // put your setup code here, to run once:
@@ -38,7 +40,7 @@ void setup() {
     }
   }
 
-  for (uint8_t i = 0; i < 14; i++) {
+  for (uint8_t i = 0; i < PIN_COUNT; i++) {
     pinMode(i, OUTPUT);
     digitalWrite(i, LOW);
     pins[i] = {OUTPUT, LOW};

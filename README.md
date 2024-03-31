@@ -5,7 +5,7 @@ A server for interacting with an arduino.
 ## Arduino support
 
 Currently only `Arduino Uno R3` is supported. To add support for others, you will need to add more pin support in the `js-server` and `arduino` folders.
-To add more pin support, you will need to update the first line of `js-server/index.js` to be the number of pins you want to support. Then, you will need to add more `<tr>` container tags to `js-server/index.html`. Finally, you will need to update the `arduino/arduino.ino` file to support the new pins.
+To add more pin support, you will need to update the first line of `js-server/index.js` to be the number of pins you want to support. Then, you will need to update the `arduino/arduino.ino` file to support the new pins.
 
 ## Requirements
 
