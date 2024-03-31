@@ -13,21 +13,23 @@ Currently only `Arduino Uno R3` is supported. To add support for others, you wil
 3. GCC
 4. binutils
 5. nodejs
+6. npm
 
 ### Installation of requirements
 
 #### Debian/Ubuntu
 
-Run `sudo apt update && sudo apt install build-essential libcjson-dev nodejs`
+Run `sudo apt update && sudo apt install build-essential libcjson-dev nodejs npm`
 
 #### Arch
 
-Run `sudo pacman -Syu base-devel cjson nodejs`
+Run `sudo pacman -Syu base-devel cjson nodejs npm`
 
 ## Building
 
-1. `arduino/arduino.ino` needs to be built and uploaded to the arduino.
-2. Run `make -C cpp-backend -j<N> all`, where `<N>` is the number of jobs or the amount of logical processors in your system.
+1. For the first build, run `cd js-server && npm update`
+2. `arduino/arduino.ino` needs to be built and uploaded to the arduino.
+3. Run `make -C cpp-backend -j<N> all`, where `<N>` is the number of jobs or the amount of logical processors in your system.
 
 ## Running
 
