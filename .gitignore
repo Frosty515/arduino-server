@@ -1,6 +1,7 @@
 bin/
 bin-int/
 build/
+node_modules/
 
 *.key
 *.crt
