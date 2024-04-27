@@ -2,7 +2,7 @@ bin/
 bin-int/
 build/
 node_modules/
+dist/
 
 *.key
 *.crt
-run.sh
