@@ -3,6 +3,9 @@ bin-int/
 build/
 node_modules/
 dist/
+.cache/
+.vscode/
 
 *.key
 *.crt
+compile_commands.json

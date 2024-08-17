@@ -1,4 +1,4 @@
-<!--
+/*
 Copyright (©) 2024  Frosty515
 
 This program is free software: you can redistribute it and/or modify
@@ -13,26 +13,20 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
+*/
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Test</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        Hello, World!
-        <br>
-        <p id="demo"></p>
-        <table>
-            <tbody id="pins">           
-            </tbody>
-        </table>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script src="arduino_lib.js"></script>
-        <script src="index.js"></script>
-    </body>
-</html>
+#include <stdio.h>
+
+#include <gtk/gtk.h>
+
+#include "App.hpp"
+
+int main(int argc, char** argv) {
+    GtkApplication* app;
+    int status;
+    app = gtk_application_new("com.github.frosty515.arduino-server", G_APPLICATION_DEFAULT_FLAGS);
+    g_signal_connect(app, "activate", G_CALLBACK(app_activate), NULL);
+    status = g_application_run(G_APPLICATION(app), argc, argv);
+    g_object_unref(app);
+    return status;
+}

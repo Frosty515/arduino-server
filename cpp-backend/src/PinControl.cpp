@@ -1,12 +1,32 @@
+/*
+Copyright (©) 2024  Frosty515
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "PinControl.hpp"
 
+#include <signal.h>
 #include <stdio.h>
+#include <string.h>
 
-#include <libserial/SerialPort.h>
+#include <libserialport.h>
 
 #include <chrono>
 
-LibSerial::SerialPort g_serial_port;
+sp_port* g_serial_port;
+sp_port_config* g_serial_port_config;
 
 enum ArduinoCommand {
     ARDUINO_COMMAND_INIT = 0xFF,
@@ -23,22 +43,39 @@ enum ArduinoResponse {
 };
 
 void StartSerial(const char* port) {
-    g_serial_port.Open(port);
-    g_serial_port.SetBaudRate(LibSerial::BaudRate::BAUD_9600);
-    g_serial_port.SetCharacterSize(LibSerial::CharacterSize::CHAR_SIZE_8);
-    g_serial_port.SetFlowControl(LibSerial::FlowControl::FLOW_CONTROL_NONE);
-    g_serial_port.SetParity(LibSerial::Parity::PARITY_NONE);
-    g_serial_port.SetStopBits(LibSerial::StopBits::STOP_BITS_DEFAULT);
+    sp_return rc = sp_get_port_by_name(port, &g_serial_port);
+    if (rc != SP_OK) {
+        printf("Error getting port by name\n");
+        exit(1);
+    }
+    rc = sp_open(g_serial_port, SP_MODE_READ_WRITE);
+    if (rc != SP_OK) {
+        printf("Error opening port\n");
+        exit(1);
+    }
+
+    sp_new_config(&g_serial_port_config);
+    sp_set_config_baudrate(g_serial_port_config, 9600);
+    sp_set_config_bits(g_serial_port_config, 8);
+    sp_set_config_parity(g_serial_port_config, SP_PARITY_NONE);
+    sp_set_config_stopbits(g_serial_port_config, 1);
+
+    rc = sp_set_config(g_serial_port, g_serial_port_config);
+    if (rc != SP_OK) {
+        printf("Error setting port config\n");
+        exit(1);
+    }
 
     bool arduino_ready = false;
 
     // 10 attempts with a 1 second timeout each
     for (uint64_t i = 0; i < 10; i++) {
         std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-        g_serial_port.WriteByte((char)ARDUINO_COMMAND_INIT);
+        uint8_t byte = ARDUINO_COMMAND_INIT;
+        sp_blocking_write(g_serial_port, &byte, 1, 1000);
         bool success = false;
         while (std::chrono::duration_cast<std::chrono::seconds>(std::chrono::high_resolution_clock::now() - start).count() < 1) {
-            if (g_serial_port.IsDataAvailable()) {
+            if (sp_input_waiting(g_serial_port) > 0) {
                 success = true;
                 break;
             }
@@ -51,33 +88,46 @@ void StartSerial(const char* port) {
     }
     if (!arduino_ready) {
         printf("Arduino not ready\n");
-        g_serial_port.Close();
+        StopSerial();
         exit(1);
     }
 
     at_quick_exit(StopSerial); // ensure it is called to close the serial port
 
+    {
+        struct sigaction sa;
+        memset(&sa, 0, sizeof(sa));
+        sa.sa_handler = [](int) -> void {
+            StopSerial();
+            exit(0);
+        };
+        sigaction(SIGINT, &sa, NULL);
+        sigaction(SIGTERM, &sa, NULL);
+        sigaction(SIGSTOP, &sa, NULL);
+    }
+
     uint8_t c;
-    g_serial_port.ReadByte(c);
-    if (c != ARDUINO_RESPONSE_INIT) {
+    rc = sp_blocking_read(g_serial_port, &c, 1, 1000);
+    if (rc < 0 || c != ARDUINO_RESPONSE_INIT) {
         printf("Invalid response from Arduino\n");
-        g_serial_port.Close();
+        StopSerial();
         exit(1);
     }
 }
 
 void StopSerial() {
-    if (g_serial_port.IsOpen())
-        g_serial_port.Close();
+    sp_close(g_serial_port);
+    sp_free_port(g_serial_port);
+    sp_free_config(g_serial_port_config);
 }
 
 void ArduinoSendByte(uint8_t byte) {
-    g_serial_port.WriteByte(byte);
-    uint8_t c;
-    g_serial_port.ReadByte(c);
-    if (c != ARDUINO_RESPONSE_ACK) {
+    sp_blocking_write(g_serial_port, &byte, 1, 1000);
+    uint8_t c = 0xFF;
+    sp_return rc = sp_blocking_read(g_serial_port, &c, 1, 1000);
+    if (rc < 0 || c != ARDUINO_RESPONSE_ACK) {
         printf("Invalid response from Arduino\n");
-        g_serial_port.Close();
+        StopSerial();
         exit(1);
     }
 }
@@ -96,12 +146,12 @@ void WritePin(int pin, bool value) {
         printf("Cannot write to pin %d. It is reserved for serial communication.\n", pin);
         return;
     }
-    printf("Writing to pin %d: %s\n", pin, value ? "HIGH" : "LOW");
+    // printf("Writing to pin %d: %s\n", pin, value ? "HIGH" : "LOW");
     ArduinoSendByte(ARDUINO_COMMAND_WRITE);
     ArduinoSendByte(pin & 0xFF);
     ArduinoSendByte(value);
-    uint8_t c;
-    g_serial_port.ReadByte(c);
+    uint8_t c = 0xFF;
+    sp_blocking_read(g_serial_port, &c, 1, 1000);
     if (c != ARDUINO_RESPONSE_SUCCESS)
         printf("Error writing pin\n");
 }
@@ -121,14 +171,15 @@ bool ReadPin(int pin) {
         printf("Cannot read from pin %d. It is reserved for serial communication.\n", pin);
         return false;
     }
-    printf("Reading from pin %d\n", pin);
+    // printf("Reading from pin %d\n", pin);
     ArduinoSendByte(ARDUINO_COMMAND_READ);
     ArduinoSendByte(pin & 0xFF);
-    uint8_t c;
-    g_serial_port.ReadByte(c);
+    uint8_t c = 0xFF;
+    sp_blocking_read(g_serial_port, &c, 1, 1000);
     if (c == ARDUINO_RESPONSE_SUCCESS) {
-        g_serial_port.ReadByte(c);
-        printf("Received: %d\n", c);
+        c = 0xFF;
+        sp_blocking_read(g_serial_port, &c, 1, 1000);
+        // printf("Received: %d\n", c);
         return c;
     }
     else
@@ -146,12 +197,12 @@ Config command layout:
 */
 
 void ConfigPinMode(int pin, bool mode) {
-    printf("Configuring pin %d to %s\n", pin, mode ? "OUTPUT" : "INPUT");
+    // printf("Configuring pin %d to %s\n", pin, mode ? "OUTPUT" : "INPUT");
     ArduinoSendByte(ARDUINO_COMMAND_CONFIG);
     ArduinoSendByte(pin & 0xFF);
     ArduinoSendByte(mode);
-    uint8_t c;
-    g_serial_port.ReadByte(c);
+    uint8_t c = 0xFF;
+    sp_blocking_read(g_serial_port, &c, 1, 1000);
     if (c != ARDUINO_RESPONSE_SUCCESS)
         printf("Error configuring pin\n");
 }

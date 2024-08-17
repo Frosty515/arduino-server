@@ -1,3 +1,20 @@
+/*
+Copyright (©) 2024  Frosty515
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 const express = require("express");
 const http = require('http');
 const https = require('https');
@@ -51,34 +68,34 @@ app.get("/style.css", (request, response) => {
 });
 
 app.post("/api/set-pin-state", (request, response) => {
-    process.stderr.write("POST event detected" + JSON.stringify(request.body) + '\n');
+    // process.stderr.write("POST event detected" + JSON.stringify(request.body) + '\n');
     request.body.type = "command";
     request.body.command = "set-pin-state";
     process.stdout.write(JSON.stringify(request.body));
     process.stdin.once('data', function (data) {
-        process.stderr.write('Recieved from C++: ' + data + '\n');
+        // process.stderr.write('Recieved from C++: ' + data + '\n');
         response.status(200).send(data);
     });
 });
 
 app.post("/api/get-pin-state", (request, response) => {
-    process.stderr.write("POST event detected" + JSON.stringify(request.body) + '\n');
+    // process.stderr.write("POST event detected" + JSON.stringify(request.body) + '\n');
     request.body.type = "command";
     request.body.command = "get-pin-state";
     process.stdout.write(JSON.stringify(request.body));
     process.stdin.once('data', function (data) {
-        process.stderr.write('Recieved from C++: ' + data + '\n');
+        // process.stderr.write('Recieved from C++: ' + data + '\n');
         response.status(200).send(data);
     });
 });
 
 app.post("/api/config-pin-mode", (request, response) => {
-    process.stderr.write("POST event detected" + JSON.stringify(request.body) + '\n');
+    // process.stderr.write("POST event detected" + JSON.stringify(request.body) + '\n');
     request.body.type = "command";
     request.body.command = "config-pin-mode";
     process.stdout.write(JSON.stringify(request.body));
     process.stdin.once('data', function (data) {
-        process.stderr.write('Recieved from C++: ' + data + '\n');
+        // process.stderr.write('Recieved from C++: ' + data + '\n');
         response.status(200).send(data);
     });
 });

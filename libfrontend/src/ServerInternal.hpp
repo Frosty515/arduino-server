@@ -1,4 +1,4 @@
-<!--
+/*
 Copyright (©) 2024  Frosty515
 
 This program is free software: you can redistribute it and/or modify
@@ -13,26 +13,17 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
--->
+*/
 
-<!DOCTYPE html>
-<html>
-    <head>
-        <title>Test</title>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" href="style.css">
-    </head>
-    <body>
-        Hello, World!
-        <br>
-        <p id="demo"></p>
-        <table>
-            <tbody id="pins">           
-            </tbody>
-        </table>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-        <script src="arduino_lib.js"></script>
-        <script src="index.js"></script>
-    </body>
-</html>
+#ifndef _SERVER_INTERNAL_HPP
+#define _SERVER_INTERNAL_HPP
+
+#include <string_view>
+
+namespace Server {
+    std::string_view& GetURL();
+
+    std::string SendHTTPPostRequest(const std::string_view& subURL, const std::string_view& body);
+}
+
+#endif /* _SERVER_INTERNAL_HPP */

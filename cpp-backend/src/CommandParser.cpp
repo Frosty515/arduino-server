@@ -1,3 +1,20 @@
+/*
+Copyright (©) 2024  Frosty515
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
 #include "CommandParser.hpp"
 #include "PinControl.hpp"
 
@@ -39,7 +56,7 @@ void ParseCommand(cJSON* command_json, int out_fd) {
                     cJSON_AddStringToObject(response, "status", "ok");
                     char* response_str = new char[1024];
                     cJSON_PrintPreallocated(response, response_str, 1023, 0);
-                    printf("Sending: %s\n", response_str);
+                    // printf("Sending: %s\n", response_str);
                     int len = strlen(response_str);
                     response_str[len] = '\n'; // add a newline character at the end
                     response_str[len + 1] = '\0'; // add a null character at the end
@@ -62,7 +79,7 @@ void ParseCommand(cJSON* command_json, int out_fd) {
                     cJSON_AddBoolToObject(response, "value", value);
                     char* response_str = new char[1024];
                     cJSON_PrintPreallocated(response, response_str, 1023, 0);
-                    printf("Sending: %s\n", response_str);
+                    // printf("Sending: %s\n", response_str);
                     int len = strlen(response_str);
                     response_str[len] = '\n'; // add a newline character at the end
                     response_str[len + 1] = '\0'; // add a null character at the end
@@ -90,7 +107,7 @@ void ParseCommand(cJSON* command_json, int out_fd) {
                     cJSON_AddStringToObject(response, "status", "ok");
                     char* response_str = new char[1024];
                     cJSON_PrintPreallocated(response, response_str, 1023, 0);
-                    printf("Sending: %s\n", response_str);
+                    // printf("Sending: %s\n", response_str);
                     int len = strlen(response_str);
                     response_str[len] = '\n'; // add a newline character at the end
                     response_str[len + 1] = '\0'; // add a null character at the end
